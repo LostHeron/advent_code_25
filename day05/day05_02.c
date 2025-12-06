@@ -84,77 +84,75 @@ int	main(int argc, char **argv)
 	return (0);
 }
 
+typedef struct s_duo
+{
+	long long min;
+	long long max;
+}		t_duo;
+
+void	free_duo(t_vector *ptr_vec);
+void	sort_vec_duo(t_vector *ptr_initial_ranges);
+
 size_t	get_valid_ids(t_vector ranges)
 {
 	size_t		i;
+	size_t		j;
 	char		**nbs;
-	size_t		res;
-	long long	min;
-	long long	max;
-	long long	valid_ranges[1000][2];
-	int			nb_valid_ranges;
+	t_vector	initial_ranges;
+	t_vector	final_ranges;
+	t_duo		duo_tmp;
 
+	ft_vector_init(&initial_ranges, 200, sizeof(t_duo), free_duo);
 	i = 0;
-	res = 0;
-	nb_valid_ranges = 0;
 	while (i < ranges.size)
 	{
 		nbs = ft_split(((char **)ranges.data)[i], "-");
-		min = atoll(nbs[0]);
-		max = atoll(nbs[1]);
-		place_new_ranges(min, max, valid_ranges, &nb_valid_ranges);
-		ft_split_free(nbs);
+		duo_tmp.min = atoll(nbs[0]);
+		duo_tmp.max = atoll(nbs[1]);
+		ft_vector_add_single(&initial_ranges, &duo_tmp);
 		i++;
 	}
-	return (res);
+	sort_vec_duo(&initial_ranges);
+	ft_vector_init(&final_ranges, 200, sizeof(t_duo), free_duo);
+	i = 0;
+	while (i < initial_ranges.size)
+	{
+		duo_tmp.min = ((t_duo *)initial_ranges.data)[i].min;
+		j = 0;
+		while (j < initial_ranges.size && ((t_duo *)initial_ranges.data)[
+	}
+	return (0);
 }
 
-void	place_new_ranges(long long min, long long max, long long valid_ranges[1000][2], int *ptr_nb_valid_ranges)
+void	sort_vec_duo(t_vector *ptr_initial_ranges)
 {
-	int	valid_ranges_i;
+	size_t	i;
+	size_t	j;
+	t_duo	*arr_duo;
+	t_duo	duo_tmp;
 
-	valid_ranges_i = 0;
-	while (valid_ranges_i < *ptr_nb_valid_ranges)
+	arr_duo = ptr_initial_ranges->data;
+	i = 0;
+	while (i < ptr_initial_ranges->size)
 	{
-		// pour chaque range i, on va regarder si min ou max est dans la range,
-		// si les deux sont dedans on fait rient,
-		// si une des deux est dedans on modifi l'autre accordingly
-		// sinon, on ajoute au bonne endroit !
-
-		if (valid_ranges[valid_ranges_i][0] <= min && min <= valid_ranges[valid_ranges_i][1] && valid_ranges[valid_ranges_i][0] <= max && max <= valid_ranges[valid_ranges_i][1])
+		j = 0;
+		while (j < ptr_initial_ranges->size - 1)
 		{
-			return ;
-		}
-		else if (valid_ranges[valid_ranges_i][0] <= min && min <= valid_ranges[valid_ranges_i][1])
-		{
-			// uniquement min est comprise dans la range et max sort a droite!
-			// must check if max is within next range 
-			if (valid_ranges_i != *ptr_nb_valid_ranges - 1)
+			if (arr_duo[i].min > arr_duo[i + 1].min)
 			{
-
+				duo_tmp = arr_duo[i];
+				arr_duo[i] = arr_duo[i + 1];
+				arr_duo[i + 1] = duo_tmp;
 			}
-			valid_ranges[valid_ranges_i][1] = max;
-			return ;
+			j++;
 		}
-		else if (valid_ranges[valid_ranges_i][0] <= max && max <= valid_ranges[valid_ranges_i][1])
-		{
-			// uniquement max est comprise dans la range et min sort a gauche
-			valid_ranges[valid_ranges_i][0] = min;
-			return ;
-		}
-		else
-		{
-			// min et max ne sont pas dans la range, il faut continuer a checker si c'est dans les suivantes 
-			continue;
-		}
+		i++;
 	}
-	if (*ptr_nb_valid_ranges == 0)
-	{
-		valid_ranges[*ptr_nb_valid_ranges][0] = min;
-		valid_ranges[*ptr_nb_valid_ranges][1] = max;
-		*ptr_nb_valid_ranges++;
-		sort_valide_ranges(valid_ranges, *ptr_nb_valid_ranges);
-	}
+}
+
+void	free_duo(t_vector *ptr_vec)
+{
+	free(ptr_vec->data);
 	return ;
 }
 
