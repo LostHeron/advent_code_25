@@ -73,7 +73,7 @@ int	main(int argc, char **argv)
 	i = 0;
 	while (i < ranges.size)
 	{
-		printf("%s", ((char **)ranges.data)[i]);
+		printf("ranges : %s", ((char **)ranges.data)[i]);
 		i++;
 	}
 	res = get_valid_ids(ranges);
@@ -101,6 +101,7 @@ size_t	get_valid_ids(t_vector ranges)
 	t_vector	initial_ranges;
 	t_vector	final_ranges;
 	t_duo		duo_tmp;
+	size_t		res;
 
 	ft_vector_init(&initial_ranges, 200, sizeof(t_duo), free_duo);
 	i = 0;
@@ -110,6 +111,7 @@ size_t	get_valid_ids(t_vector ranges)
 		duo_tmp.min = atoll(nbs[0]);
 		duo_tmp.max = atoll(nbs[1]);
 		ft_vector_add_single(&initial_ranges, &duo_tmp);
+		ft_split_free(nbs);
 		i++;
 	}
 	sort_vec_duo(&initial_ranges);
@@ -118,10 +120,36 @@ size_t	get_valid_ids(t_vector ranges)
 	while (i < initial_ranges.size)
 	{
 		duo_tmp.min = ((t_duo *)initial_ranges.data)[i].min;
-		j = 0;
-		while (j < initial_ranges.size && ((t_duo *)initial_ranges.data)[
+		duo_tmp.max = ((t_duo *)initial_ranges.data)[i].max;
+		j = i + 1;
+		while (j < initial_ranges.size)
+		{
+			if (duo_tmp.max >= ((t_duo *)initial_ranges.data)[j].max)
+			{
+				j++;
+			}
+			else if (duo_tmp.max >= ((t_duo *)initial_ranges.data)[j].min)
+			{
+				duo_tmp.max = ((t_duo *)initial_ranges.data)[j].max;
+				j++;
+			}
+			else
+			{
+				break;
+			}
+		}
+		i = j;
+		ft_vector_add_single(&final_ranges, &duo_tmp);
 	}
-	return (0);
+	i = 0;
+	res = 0;
+	while (i < final_ranges.size)
+	{
+		res += ((t_duo *)final_ranges.data)[i].max - ((t_duo *)final_ranges.data)[i].min + 1;
+		printf("final_ranges:  %lld - %lld\n", ((t_duo *)final_ranges.data)[i].min, ((t_duo *)final_ranges.data)[i].max);
+		i++;
+	}
+	return (res);
 }
 
 void	sort_vec_duo(t_vector *ptr_initial_ranges)
@@ -138,11 +166,11 @@ void	sort_vec_duo(t_vector *ptr_initial_ranges)
 		j = 0;
 		while (j < ptr_initial_ranges->size - 1)
 		{
-			if (arr_duo[i].min > arr_duo[i + 1].min)
+			if (arr_duo[j].min > arr_duo[j + 1].min)
 			{
-				duo_tmp = arr_duo[i];
-				arr_duo[i] = arr_duo[i + 1];
-				arr_duo[i + 1] = duo_tmp;
+				duo_tmp = arr_duo[j];
+				arr_duo[j] = arr_duo[j + 1];
+				arr_duo[j + 1] = duo_tmp;
 			}
 			j++;
 		}
