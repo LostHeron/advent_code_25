@@ -11,6 +11,7 @@
 
 #define TRUE 1
 #define FALSE 0
+#define MAX_CONNECTIONS 4536
 
 typedef struct s_point
 {
@@ -69,7 +70,7 @@ int	main(int argc, char **argv)
 	printf("\n");
 	res = 0;
 	res = get_connection(lines);
-	//printf("res = %zu\n", res);
+	printf("res = %zu\n", res);
 	ft_vector_free(&lines);
 	return (0);
 }
@@ -134,13 +135,14 @@ size_t	get_connection(t_vector lines)
 		}
 		y_i++;
 	}
+	printf("nb_connections = %zu\n", nb_connections);
 	printf("before sort connection\n");
 	sort_connection_array(connection_array, nb_connections);
 	printf("after sort connection\n");
 	print_connection(connection_array, nb_connections, points.data);
 	group_connections(connection_array, nb_connections);
 	free(points.data);
-	return (0);
+	return (res);
 }
 
 void	print_chained_connection(t_vector chained_connection);
@@ -166,7 +168,7 @@ void	group_connections(t_connection *connection_array, size_t nb_connection)
 		group_i++;
 	}
 	connection_i = 0;
-	while (connection_i < 1000)
+	while (connection_i < MAX_CONNECTIONS)
 	{
 		printf("connection %zu\n", connection_i);
 		group_i = 0;
@@ -293,11 +295,13 @@ void	mix_chained_lst(t_vector *ptr_chained_connection, size_t index1, size_t ind
 	i = index2;
 	while (i < ptr_chained_connection->size - 1)
 	{
+		((t_node **)ptr_chained_connection->data)[i] = NULL;
 		tmp_node = ((t_node **)ptr_chained_connection->data)[i];
 		((t_node **)ptr_chained_connection->data)[i] = ((t_node **)ptr_chained_connection->data)[i + 1];
 		((t_node **)ptr_chained_connection->data)[i + 1] = tmp_node;
 		i++;
 	}
+	ptr_chained_connection->size -= 1;
 	return ;
 }
 
@@ -348,24 +352,27 @@ void	sort_connection_array(t_connection *connection_array, size_t nb_connections
 {
 	size_t			i;
 	size_t			j;
+	size_t			min_connection_index;
 	t_connection	tmp_connection;
 
 	i = 0;
-	while (i < nb_connections)
+	while (i < nb_connections && i < MAX_CONNECTIONS + 1)
 	{
 		if (i % 1000 == 0)
 			printf("progression : %zu / %zu\n", i, nb_connections);
-		j = 0;
-		while (j < nb_connections - 1 - i)
+		min_connection_index = i;
+		j = i + 1;
+		while (j < nb_connections)
 		{
-			if (connection_array[j].distance > connection_array[j + 1].distance)
+			if (connection_array[j].distance < connection_array[min_connection_index].distance)
 			{
-				tmp_connection = connection_array[j];
-				connection_array[j] = connection_array[j + 1];
-				connection_array[j + 1] = tmp_connection;
+				min_connection_index = j;
 			}
 			j++;
 		}
+		tmp_connection = connection_array[min_connection_index];
+		connection_array[min_connection_index] = connection_array[i];
+		connection_array[i] = tmp_connection;
 		i++;
 	}
 	return ;
@@ -378,7 +385,7 @@ void	print_connection(t_connection *connection_array, size_t nb_connections, t_p
 	i = 0;
 	while (i < nb_connections)
 	{
-		printf("x = %zu (%.0f %.0f %.0f), y = %zu (%.0f %.0f %.0f), distance = %f\n", 
+		printf("connection %zu : x = %zu (%.0f %.0f %.0f), y = %zu (%.0f %.0f %.0f), distance = %f\n", i, 
 			connection_array[i].x + 1, point_array[connection_array[i].x].x, point_array[connection_array[i].x].y, point_array[connection_array[i].x].z,
 		 	connection_array[i].y + 1, point_array[connection_array[i].y].x, point_array[connection_array[i].y].y, point_array[connection_array[i].y].z,
 		 	connection_array[i].distance);

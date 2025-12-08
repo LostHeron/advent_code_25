@@ -7,7 +7,7 @@ makelibft:
 	$(MAKE) -C ../libft/
 
 $(NAME_01): $(NAME_01).c
-	cc  -Wall -Wextra -Werror -lm -g3 -o $@ $< -lft -L ../libft/ -I ../libft/includes/
+	cc  -Wall -Wextra -Werror -g3 -o $@ $< -lft -L ../libft/ -I ../libft/includes/  -lm
 
 $(NAME_02): $(NAME_02).c
-	cc -Wall -Wextra -Werror -lm -g3 -o $@ $< -lft -L ../libft/ -I ../libft/includes/
+	cc -Wall -Wextra -Werror -g3 -o $@ $< -lft -L ../libft/ -I ../libft/includes/ -lm
