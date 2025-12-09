@@ -50,6 +50,7 @@ int	main(int argc, char **argv)
 	}
 	printf("\n");
 	res = 0;
+	printf("res = %zu\n", res);
 	t_vector	points;
 	t_point		tmp_point;
 	char		**nbs;

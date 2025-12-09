@@ -47,6 +47,8 @@ typedef struct s_rectangle
 	t_point c;
 	t_point d;
 	size_t	area;
+	size_t	length;
+	size_t	width;
 }	t_rectangle;
 
 void	free_char_star(t_vector *ptr_lines);
@@ -126,12 +128,14 @@ void	algo(t_vector points)
 	get_segments(points, &segments);
 	get_rectangles(points, &rectangles);
 	nb_sorted = 0;
-	while (nb_sorted < 11)
+	while (nb_sorted < 10)
 	{
 		sort_rectangles(rectangles, &nb_sorted, 1);
 		print_single_rectangle(((t_rectangle *)rectangles.data)[nb_sorted - 1]);
 		if (check_rectangle_valid(((t_rectangle *)rectangles.data)[nb_sorted - 1], segments) == TRUE)
+		{
 			printf("rectangle is VALID !\n");
+		}
 		else
 			printf("rectangle is NOT valid\n");
 	}
@@ -177,22 +181,36 @@ int	check_rectangle_valid(t_rectangle rectangle, t_vector segments)
 			return (FALSE);
 		i++;
 	}
+	// now must check if all points on the rectangle border are on a segment
+	// aaaah but no, not good, they can be not on any segment and still be a valid
+	// point
+	// of maybe, do some bsp stuff for each point in the rectangle ?
+	// yeah but not possible either, approx 10e9 points per square, so way too
+	// long
+	// raaaah if do not get it 
+	// hm maybe check 4 coins of rectangle are within the maps 
+	// using BSP stuff, but anyway, time to sleep !
 	return (TRUE);
 }
 
-#define max(s1,s2) s1 > s2 ? s1 : s2
-#define min(s1,s2) s1 < s2 ? s1 : s2
+ssize_t	min(ssize_t	a, ssize_t b)
+{
+	if (a < b)
+		return (a);
+	else
+		return (b);
+}
+
+ssize_t	max(ssize_t	a, ssize_t b)
+{
+	if (a > b)
+		return (a);
+	else
+		return (b);
+}
 
 int	check_intersection(t_segment s1, t_segment s2)
 {
-	printf("s1.start.x = %zu\n", s1.start.x);
-	printf("s1.start.y = %zu\n", s1.start.y);
-	printf("s1.end.x = %zu\n", s1.end.x);
-	printf("s1.end.y = %zu\n", s1.end.y);
-	printf("s2.start.x = %zu\n", s2.start.x);
-	printf("s2.start.y = %zu\n", s2.start.y);
-	printf("s2.end.x = %zu\n", s2.end.x);
-	printf("s2.end.y = %zu\n", s2.end.y);
 	if (s1.direction == s2.direction || s1.direction == -s2.direction)
 		return (FALSE);
 	if (s1.direction == LEFT || s1.direction == RIGHT)// y const for s1
@@ -201,24 +219,16 @@ int	check_intersection(t_segment s1, t_segment s2)
 		{
 			if ((min(s1.start.x, s1.end.x) < s2.end.x) && (s2.end.x < max(s1.start.x, s1.end.x)))
 			{
-				printf("return true  left right here\n");
 				return (TRUE);
 			}
 		}
 	}
 	else if (s1.direction == DOWN || s1.direction == UP) // x const for s1
 	{
-		printf("min(s2.end.x, s2.start.x) = %zu\n", min(s2.end.x, s2.start.x));
-		printf("max(s2.end.x, s2.start.x) = %zu\n", max(s2.end.x, s2.start.x));
-		printf("s1.start.x = %zu\n", s1.start.x);
-		printf("min(s2.end.x, s2.start.x) < s1.start.x = %lu\n", min(s2.end.x, s2.start.x) < s1.start.x);
-		printf("s1.start.x < max(s2.end.x, s2.start.x) = %lu\n", s1.start.x < max(s2.end.x, s2.start.x));
-		printf("min(s2.end.x, s2.start.x) < s1.start.x && s1.start.x < max(s2.end.x, s2.start.x) = %lu\n", min(s2.end.x, s2.start.x) < s1.start.x && (s1.start.x < max(s2.end.x, s2.start.x)));
 		if ((min(s2.end.x, s2.start.x) < s1.start.x) && (s1.start.x < max(s2.end.x, s2.start.x)))
 		{
 			if ((min(s1.start.y, s1.end.y) < s2.end.y) && (s2.end.y < max(s1.start.y, s1.end.y)))
 			{
-				printf("return true down up here\n");
 				return (TRUE);
 			}
 		}
@@ -307,8 +317,9 @@ void	get_rectangles(t_vector points, t_vector *ptr_rectangles)
 			rectangle_tmp.b.y = rectangle_tmp.d.y;
 			rectangle_tmp.c.x = rectangle_tmp.d.x;
 			rectangle_tmp.c.y = rectangle_tmp.a.y;
-			rectangle_tmp.area= (llabs(((t_point *)points.data)[i].x - ((t_point *)points.data)[j].x) + 1)
-				* (llabs(((t_point *)points.data)[i].y - ((t_point *)points.data)[j].y) + 1);
+			rectangle_tmp.length = llabs(((t_point *)points.data)[i].x - ((t_point *)points.data)[j].x) + 1;
+			rectangle_tmp.width = llabs(((t_point *)points.data)[i].y - ((t_point *)points.data)[j].y) + 1;
+			rectangle_tmp.area = rectangle_tmp.length * rectangle_tmp.width;
 			ft_vector_add_single(ptr_rectangles, &rectangle_tmp);
 			j++;
 		}
@@ -342,6 +353,8 @@ void print_single_rectangle(t_rectangle rectangle)
 	printf("c.x : %zu, c.y : %zu\n", rectangle.c.x, rectangle.c.y);
 	printf("d.x : %zu, d.y : %zu\n", rectangle.d.x, rectangle.d.y);
 	printf("area: %zu\n", rectangle.area);
+	printf("length: %zu\n", rectangle.length);
+	printf("with: %zu\n", rectangle.width);
 	printf("~~~~~~~~~~~~~~~~~~~\n\n");
 }
 
