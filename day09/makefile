@@ -1,7 +1,7 @@
 NAME_01 = day09_01
 NAME_02 = day09_02
 
-all: makelibft $(NAME_01) #$(NAME_02)
+all: makelibft $(NAME_01) $(NAME_02)
 
 makelibft:	
 	$(MAKE) -C ../libft/
