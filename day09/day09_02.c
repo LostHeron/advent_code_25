@@ -185,22 +185,42 @@ int	check_rectangle_valid(t_rectangle rectangle, t_vector segments)
 
 int	check_intersection(t_segment s1, t_segment s2)
 {
+	printf("s1.start.x = %zu\n", s1.start.x);
+	printf("s1.start.y = %zu\n", s1.start.y);
+	printf("s1.end.x = %zu\n", s1.end.x);
+	printf("s1.end.y = %zu\n", s1.end.y);
+	printf("s2.start.x = %zu\n", s2.start.x);
+	printf("s2.start.y = %zu\n", s2.start.y);
+	printf("s2.end.x = %zu\n", s2.end.x);
+	printf("s2.end.y = %zu\n", s2.end.y);
 	if (s1.direction == s2.direction || s1.direction == -s2.direction)
 		return (FALSE);
 	if (s1.direction == LEFT || s1.direction == RIGHT)// y const for s1
 	{
-		if (min(s2.end.y, s2.start.y) <= s1.start.y && s1.start.y <= max(s2.end.y, s2.start.y))
+		if ((min(s2.end.y, s2.start.y) < s1.start.y) && (s1.start.y < max(s2.end.y, s2.start.y)))
 		{
-			if (min(s1.start.x, s1.end.x) < s2.end.x && s2.end.x < max(s1.start.x, s1.end.x))
+			if ((min(s1.start.x, s1.end.x) < s2.end.x) && (s2.end.x < max(s1.start.x, s1.end.x)))
+			{
+				printf("return true  left right here\n");
 				return (TRUE);
+			}
 		}
 	}
 	else if (s1.direction == DOWN || s1.direction == UP) // x const for s1
 	{
-		if (min(s2.end.x, s2.start.x) < s1.start.x && s1.start.x < max(s2.end.x, s2.start.x))
+		printf("min(s2.end.x, s2.start.x) = %zu\n", min(s2.end.x, s2.start.x));
+		printf("max(s2.end.x, s2.start.x) = %zu\n", max(s2.end.x, s2.start.x));
+		printf("s1.start.x = %zu\n", s1.start.x);
+		printf("min(s2.end.x, s2.start.x) < s1.start.x = %lu\n", min(s2.end.x, s2.start.x) < s1.start.x);
+		printf("s1.start.x < max(s2.end.x, s2.start.x) = %lu\n", s1.start.x < max(s2.end.x, s2.start.x));
+		printf("min(s2.end.x, s2.start.x) < s1.start.x && s1.start.x < max(s2.end.x, s2.start.x) = %lu\n", min(s2.end.x, s2.start.x) < s1.start.x && (s1.start.x < max(s2.end.x, s2.start.x)));
+		if ((min(s2.end.x, s2.start.x) < s1.start.x) && (s1.start.x < max(s2.end.x, s2.start.x)))
 		{
-			if (min(s1.start.y, s1.end.y) < s2.end.y && s2.end.y < max(s1.start.y, s1.end.y))
+			if ((min(s1.start.y, s1.end.y) < s2.end.y) && (s2.end.y < max(s1.start.y, s1.end.y)))
+			{
+				printf("return true down up here\n");
 				return (TRUE);
+			}
 		}
 	}
 	return (FALSE);
